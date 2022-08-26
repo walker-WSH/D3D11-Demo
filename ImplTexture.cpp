@@ -1,13 +1,9 @@
 #include "stdafx.h"
-#include "ImplTexture.h" 
+#include "ImplTexture.h"
 
-tTexture::tTexture()
-	: m_nWidth(0)
-	, m_nHeight(0)
-	, m_ShaderType(EST_DEFAULT)
+tTexture::tTexture() : m_nWidth(0), m_nHeight(0), m_ShaderType(EST_DEFAULT)
 {
-	for (size_t i = 0; i < MAX_TEXTURE_NUM; i++)
-	{
+	for (size_t i = 0; i < MAX_TEXTURE_NUM; i++) {
 		m_pTextures[i] = ComPtr<ID3D11Texture2D>();
 		m_pResourceViews[i] = ComPtr<ID3D11ShaderResourceView>();
 	}
@@ -22,11 +18,10 @@ tTexture::tTexture()
 	_UpdateMatrix();
 }
 
-void tTexture::GetResourceViewList(ID3D11ShaderResourceView* out[MAX_TEXTURE_NUM], int& viewCount)
+void tTexture::GetResourceViewList(ID3D11ShaderResourceView *out[MAX_TEXTURE_NUM], int &viewCount)
 {
 	viewCount = 0;
-	for (size_t i = 0; i < MAX_TEXTURE_NUM; i++)
-	{
+	for (size_t i = 0; i < MAX_TEXTURE_NUM; i++) {
 		out[i] = m_pResourceViews[i].Get();
 		if (out[i])
 			++viewCount;
@@ -58,7 +53,7 @@ void tTexture::_UpdateMatrix()
 	m_WorldMatrix *= mv;
 }
 
-bool tTexture::InitTexture(ComPtr<ID3D11Device> pDevice, WCHAR* textureFilename)
+bool tTexture::InitTexture(ComPtr<ID3D11Device> pDevice, WCHAR *textureFilename)
 {
 	HRESULT result = D3DX11CreateShaderResourceViewFromFile(pDevice, textureFilename, NULL, NULL, m_pResourceViews[0].Assign(), NULL);
 	if (FAILED(result))
@@ -112,11 +107,11 @@ bool tTexture::_CreateDynTexture(ComPtr<ID3D11Device> pDevice, int index, DXGI_F
 	return true;
 }
 
-bool tTexture::InitTextureYUYV422(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char* file)
+bool tTexture::InitTextureYUYV422(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char *file)
 {
 	m_ShaderType = EST_YUYV422;
 
-	FILE* fp = 0;
+	FILE *fp = 0;
 	fopen_s(&fp, file, "rb");
 	if (!fp)
 		return false;
@@ -125,13 +120,12 @@ bool tTexture::InitTextureYUYV422(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Dev
 	fread(&m_nHeight, sizeof(int), 1, fp);
 
 	int len = m_nWidth * m_nHeight * 2;
-	BYTE* data = new BYTE[len];
+	BYTE *data = new BYTE[len];
 
 	fread(data, len, 1, fp);
 	fclose(fp);
 
-	if (_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8G8B8A8_UNORM, m_nWidth, m_nHeight))
-	{
+	if (_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8G8B8A8_UNORM, m_nWidth, m_nHeight)) {
 		D3D11_MAPPED_SUBRESOURCE map = {};
 		pDeviceContext->Map(m_pTextures[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
 
@@ -143,21 +137,18 @@ bool tTexture::InitTextureYUYV422(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Dev
 
 		BYTE preU = 0;
 		BYTE preV = 0;
-		BYTE* pMapBuffer = reinterpret_cast<BYTE*>(map.pData);
-		for (int h = 0; h < m_nHeight; ++h)
-		{
-			BYTE* srcTemp = data + srcStride * h;
-			BYTE* destTemp = pMapBuffer + destStride * h;
-			for (int w = 0; w < m_nWidth; ++w)
-			{
+		BYTE *pMapBuffer = reinterpret_cast<BYTE *>(map.pData);
+		for (int h = 0; h < m_nHeight; ++h) {
+			BYTE *srcTemp = data + srcStride * h;
+			BYTE *destTemp = pMapBuffer + destStride * h;
+			for (int w = 0; w < m_nWidth; ++w) {
 				destTemp[0] = srcTemp[0]; // y
-				if ((w % 2) == 0) // [1] is u
-				{ 
+				if ((w % 2) == 0)         // [1] is u
+				{
 					preU = srcTemp[1];
 					destTemp[1] = srcTemp[1];
 					destTemp[2] = preV;
-				}
-				else  // [1] is v
+				} else // [1] is v
 				{
 					preV = srcTemp[1];
 					destTemp[1] = preU;
@@ -178,11 +169,11 @@ bool tTexture::InitTextureYUYV422(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Dev
 	return true;
 }
 
-bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char* file)
+bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char *file)
 {
 	m_ShaderType = EST_YUV420;
 
-	FILE* fp = 0;
+	FILE *fp = 0;
 	fopen_s(&fp, file, "rb");
 	if (!fp)
 		return false;
@@ -190,15 +181,14 @@ bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Devi
 	fread(&m_nWidth, sizeof(int), 1, fp);
 	fread(&m_nHeight, sizeof(int), 1, fp);
 
-	if (_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8G8B8A8_UNORM, m_nWidth, m_nHeight))
-	{
+	if (_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8G8B8A8_UNORM, m_nWidth, m_nHeight)) {
 		int yLen = m_nWidth * m_nHeight;
 		int uLen = (m_nWidth * m_nHeight) / 4;
 		int vLen = (m_nWidth * m_nHeight) / 4;
 
-		BYTE* yData = new BYTE[yLen];
-		BYTE* uData = new BYTE[uLen];
-		BYTE* vData = new BYTE[vLen];
+		BYTE *yData = new BYTE[yLen];
+		BYTE *uData = new BYTE[uLen];
+		BYTE *vData = new BYTE[vLen];
 
 		fread(yData, yLen, 1, fp);
 		fread(uData, uLen, 1, fp);
@@ -207,14 +197,12 @@ bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Devi
 		D3D11_MAPPED_SUBRESOURCE map = {};
 		pDeviceContext->Map(m_pTextures[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
 
-		BYTE* pMapBuffer = reinterpret_cast<BYTE*>(map.pData);
+		BYTE *pMapBuffer = reinterpret_cast<BYTE *>(map.pData);
 		int strideY = m_nWidth;
 		int strideUV = m_nWidth / 2;
 		int pixelSize = 4;
-		for (int h = 0; h < m_nHeight; h += 2)
-		{
-			for (int w = 0; w < m_nWidth; w += 2)
-			{
+		for (int h = 0; h < m_nHeight; h += 2) {
+			for (int w = 0; w < m_nWidth; w += 2) {
 				int h2 = h / 2;
 				int w2 = w / 2;
 				int indexUV = strideUV * h2 + w2;
@@ -222,11 +210,9 @@ bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Devi
 				BYTE u = uData[indexUV];
 				BYTE v = vData[indexUV];
 
-				for (int h2 = 0; h2 < 2 && (h + h2) < m_nHeight; h2++)
-				{
+				for (int h2 = 0; h2 < 2 && (h + h2) < m_nHeight; h2++) {
 					int dest = map.RowPitch * (h + h2);
-					for (int w2 = 0; w2 < 2 && (w + w2) < m_nWidth; w2++)
-					{
+					for (int w2 = 0; w2 < 2 && (w + w2) < m_nWidth; w2++) {
 						BYTE y = yData[strideY * (h + h2) + (w + w2)];
 						pMapBuffer[dest + (w + w2) * pixelSize + 0] = y; // r y
 						pMapBuffer[dest + (w + w2) * pixelSize + 1] = u; // g u
@@ -248,29 +234,28 @@ bool tTexture::InitTextureYUV420(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11Devi
 	return true;
 }
 
-void tTexture::_MapTexture(ComPtr<ID3D11DeviceContext> pDeviceContext, int index, BYTE* src, int width, int height)
+void tTexture::_MapTexture(ComPtr<ID3D11DeviceContext> pDeviceContext, int index, BYTE *src, int width, int height)
 {
 	D3D11_MAPPED_SUBRESOURCE map = {};
 	pDeviceContext->Map(m_pTextures[index], 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
 
-    int srcStride = width;
-    int destStride = map.RowPitch;
-	BYTE* pMapBuffer = reinterpret_cast<BYTE*>(map.pData);
-	for (int h = 0; h < height; h += 1)
-	{
-        memmove(pMapBuffer, src, srcStride);
-        pMapBuffer += destStride;
-        src += srcStride;
+	int srcStride = width;
+	int destStride = map.RowPitch;
+	BYTE *pMapBuffer = reinterpret_cast<BYTE *>(map.pData);
+	for (int h = 0; h < height; h += 1) {
+		memmove(pMapBuffer, src, srcStride);
+		pMapBuffer += destStride;
+		src += srcStride;
 	}
 
 	pDeviceContext->Unmap(m_pTextures[index], 0);
 }
 
-bool tTexture::InitTextureYUV420_Ex(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char* file)
+bool tTexture::InitTextureYUV420_Ex(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11DeviceContext> pDeviceContext, char *file)
 {
 	m_ShaderType = EST_YUV420_Ex;
 
-	FILE* fp = 0;
+	FILE *fp = 0;
 	fopen_s(&fp, file, "rb");
 	if (!fp)
 		return false;
@@ -278,10 +263,8 @@ bool tTexture::InitTextureYUV420_Ex(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11D
 	fread(&m_nWidth, sizeof(int), 1, fp);
 	fread(&m_nHeight, sizeof(int), 1, fp);
 
-	if (!_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8_UNORM, m_nWidth, m_nHeight) ||
-		!_CreateDynTexture(pDevice, 1, DXGI_FORMAT_R8_UNORM, m_nWidth / 2, m_nHeight / 2) ||
-		!_CreateDynTexture(pDevice, 2, DXGI_FORMAT_R8_UNORM, m_nWidth / 2, m_nHeight / 2))
-	{
+	if (!_CreateDynTexture(pDevice, 0, DXGI_FORMAT_R8_UNORM, m_nWidth, m_nHeight) || !_CreateDynTexture(pDevice, 1, DXGI_FORMAT_R8_UNORM, m_nWidth / 2, m_nHeight / 2) ||
+	    !_CreateDynTexture(pDevice, 2, DXGI_FORMAT_R8_UNORM, m_nWidth / 2, m_nHeight / 2)) {
 		fclose(fp);
 		return false;
 	}
@@ -290,9 +273,9 @@ bool tTexture::InitTextureYUV420_Ex(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D11D
 	int uLen = (m_nWidth * m_nHeight) / 4;
 	int vLen = (m_nWidth * m_nHeight) / 4;
 
-	BYTE* yData = new BYTE[yLen];
-	BYTE* uData = new BYTE[uLen];
-	BYTE* vData = new BYTE[vLen];
+	BYTE *yData = new BYTE[yLen];
+	BYTE *uData = new BYTE[uLen];
+	BYTE *vData = new BYTE[vLen];
 
 	fread(yData, yLen, 1, fp);
 	fread(uData, uLen, 1, fp);
@@ -331,36 +314,27 @@ void tTexture::_InitPosition()
 	_UpdateMatrix();
 }
 
-#define BORDER_OFFSET  10 
+#define BORDER_OFFSET 10
 E_D3D_MOUSE_STATUS tTexture::TestMouseStatus(CPointF ptD3D)
 {
 	float right = m_tPosition.x + GetWidthUI();
 	float bottom = m_tPosition.y + GetHeightUI();
-	if (ptD3D.x >= m_tPosition.x &&
-		ptD3D.x <= right &&
-		ptD3D.y >= m_tPosition.y &&
-		ptD3D.y <= bottom)
-	{
+	if (ptD3D.x >= m_tPosition.x && ptD3D.x <= right && ptD3D.y >= m_tPosition.y && ptD3D.y <= bottom) {
 		if (ptD3D.x >= (right - BORDER_OFFSET) && ptD3D.y >= (bottom - BORDER_OFFSET))
 			return DMS_RIGHT_BOTTOM;
 		else
 			return DMS_MOVE;
-	}
-	else
-	{
+	} else {
 		return DMS_NONE;
 	}
 }
 
-bool tTexture::TestSelected(CPointF ptD3D, E_D3D_MOUSE_STATUS& outMouseState)
+bool tTexture::TestSelected(CPointF ptD3D, E_D3D_MOUSE_STATUS &outMouseState)
 {
 	outMouseState = TestMouseStatus(ptD3D);
-	if (outMouseState != DMS_NONE)
-	{
+	if (outMouseState != DMS_NONE) {
 		m_bSelected = true;
-	}
-	else
-	{
+	} else {
 		m_bSelected = false;
 	}
 

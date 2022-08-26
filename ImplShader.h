@@ -3,8 +3,7 @@
 #include <Windows.h>
 #include "d3dDefine.h"
 
-struct tShader
-{
+struct tShader {
 	//vertex shader
 	ComPtr<ID3D11VertexShader> m_pVertexShader;
 	ComPtr<ID3D11Buffer> m_pVSBuffer;
@@ -19,5 +18,5 @@ struct tShader
 	ComPtr<ID3D11SamplerState> m_pSampleState;
 
 public:
-	bool InitShader(ComPtr<ID3D11Device> pDevice, WCHAR* vsFile, WCHAR* psFile, int vertexSize, int vsBufferSize, int psBufferSize);
+	bool InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psFile, int vertexSize, int vsBufferSize, int psBufferSize);
 };

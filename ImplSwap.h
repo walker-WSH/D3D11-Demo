@@ -3,12 +3,11 @@
 #include <Windows.h>
 #include "d3dDefine.h"
 
-struct tWindowSwap
-{
+struct tWindowSwap {
 	HWND m_hWnd;
 	UINT m_SwapBufferCount;
 
-	ComPtr<IDXGISwapChain> m_pSwapChain; // IDXGISwapChain.size == window.size
+	ComPtr<IDXGISwapChain> m_pSwapChain;          // IDXGISwapChain.size == window.size
 	ComPtr<ID3D11Texture2D> m_pSwapBackTexture2D; // back buffer of swapchain
 	ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
 
