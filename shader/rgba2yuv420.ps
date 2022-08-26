@@ -1,0 +1,45 @@
+
+Texture2D<float4> shaderTexture;
+SamplerState sampleType;
+ 
+cbuffer TextureBuffer
+{ 
+	float fImageWdith;
+	float fImageHeight;
+	float fOffsetX; // (1/width) / 2
+	float fOffsetY;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+static const float yOffset = 16.f / 255.f;  
+static const float uvOffset = 128.f / 255.f;
+
+float4 PS(PixelInputType input) : SV_TARGET
+{  
+	int width = input.tex.x * fImageWdith;
+	int height = input.tex.y * fImageHeight;
+	 
+	float2 centerUV;
+	if ((width % 2) == 0)
+		centerUV.x = input.tex.x + fOffsetX;
+	else
+		centerUV.x = input.tex.x - fOffsetX;
+		
+	if ((height % 2) == 0) 
+		centerUV.y = input.tex.y + fOffsetY; 
+	else 
+		centerUV.y = input.tex.y - fOffsetY; 
+
+    float4 rgba = shaderTexture.Sample(sampleType, input.tex);
+    float4 center = shaderTexture.Sample(sampleType, centerUV); 
+  
+	float y = 0.256788*rgba.x + 0.504129*rgba.y + 0.097906*rgba.z + yOffset;  
+	float u = -0.148223*center.x - 0.290993*center.y + 0.439216*center.z + uvOffset; 
+	float v = 0.439216*center.x - 0.367788*center.y - 0.071427*center.z + uvOffset;
+	return float4(y, u, v, 1.f);
+}

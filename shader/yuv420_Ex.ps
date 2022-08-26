@@ -1,0 +1,28 @@
+
+Texture2D<float> yTexture : register(t0);  
+Texture2D<float> uTexture : register(t1);  
+Texture2D<float> vTexture : register(t2);  
+
+Texture2D shaderTexture;
+SamplerState SampleType;
+ 
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+  
+static const float3 R_cf = float3(1.164383, 0.000000, 1.596027);
+static const float3 G_cf = float3(1.164383, -0.391762, -0.812968);
+static const float3 B_cf = float3(1.164383, 2.017232, 0.000000);
+static const float3 offset = float3(-0.0625, -0.5, -0.5);
+ 
+float4 PS(PixelInputType input) : SV_TARGET
+{  
+    float floatY = yTexture.Sample(SampleType, input.tex);  
+    float floatU = uTexture.Sample(SampleType, input.tex); 
+    float floatV = vTexture.Sample(SampleType, input.tex); 
+	 
+	float3 yuv = float3(floatY, floatU, floatV) + offset;
+	return float4(dot(yuv, R_cf), dot(yuv, G_cf), dot(yuv, B_cf), 1.0);
+}
