@@ -15,7 +15,6 @@ struct tShader {
 	ComPtr<ID3D11InputLayout> m_pInputLayout;
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;
 
-	ComPtr<ID3D11SamplerState> m_pSampleState;
 
 public:
 	bool InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psFile, int vertexSize, int vsBufferSize, int psBufferSize);

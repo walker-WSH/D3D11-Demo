@@ -101,20 +101,5 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 		}
 	}
 
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.MaxAnisotropy = 16;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = pDevice->CreateSamplerState(&samplerDesc, m_pSampleState.Assign());
-	if (FAILED(hr)) {
-		assert(false);
-		return false;
-	}
-
 	return true;
 }

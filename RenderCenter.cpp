@@ -29,6 +29,9 @@ bool CRenderCenter::InitRender(HWND hPreview)
 	if (!_InitBlendState())
 		return false;
 
+	if (!_InitSamplerState())
+		return false;
+
 	if (!_AddSwapChain(hPreview)) // create default display
 		return false;
 
@@ -80,8 +83,30 @@ bool CRenderCenter::_InitBlendState()
 	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	if (FAILED(m_pDevice->CreateBlendState(&blendStateDescription, m_pBlendState.Assign())))
+	if (FAILED(m_pDevice->CreateBlendState(&blendStateDescription, m_pBlendState.Assign()))) {
+		assert(false);
 		return false;
+	}
+
+	return true;
+}
+
+bool CRenderCenter::_InitSamplerState()
+{
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	if (FAILED(m_pDevice->CreateSamplerState(&samplerDesc, m_pSampleState.Assign()))) {
+		assert(false);
+		return false;
+	}
 
 	return true;
 }
@@ -307,7 +332,7 @@ void CRenderCenter::_RenderTextureInner(ID3D11ShaderResourceView **views, int co
 		m_pDeviceContext->PSSetConstantBuffers(0, 1, buffer);
 	}
 
-	ID3D11SamplerState *sampleState = m_pTextureShader->m_pSampleState.Get();
+	ID3D11SamplerState *sampleState = m_pSampleState.Get();
 	m_pDeviceContext->PSSetSamplers(0, 1, &sampleState);
 	m_pDeviceContext->PSSetShaderResources(0, count, views);
 	m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);

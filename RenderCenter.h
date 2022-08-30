@@ -15,6 +15,7 @@ public:
 	ComPtr<ID3D11Device> m_pDevice;
 	ComPtr<ID3D11DeviceContext> m_pDeviceContext;
 	ComPtr<ID3D11BlendState> m_pBlendState;
+	ComPtr<ID3D11SamplerState> m_pSampleState;
 
 	int m_nCurrentSwap;
 	std::vector<tWindowSwap> m_WndList;
@@ -49,6 +50,7 @@ private:
 	bool _InitDevice();
 	bool _AddSwapChain(HWND hWnd);
 	bool _InitBlendState();
+	bool _InitSamplerState();
 	void _SetDisplayWnd(tWindowSwap &swap);
 	void _UpdateTextureVertexBuffer(int w, int h, bool bFlipH, bool bFlipV);
 	void _UpdateBorderVertexBuffer(tTexture *pTexture);
