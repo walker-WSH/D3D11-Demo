@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ImplShader.h"
+#include <assert.h>
 
 bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psFile, int vertexSize, int vsBufferSize, int psBufferSize)
 {
@@ -9,35 +10,43 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 
 	UINT flag = D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_DEBUG | D3D10_SHADER_SKIP_OPTIMIZATION;
 
-	HRESULT result = D3DX11CompileFromFile(vsFile, NULL, NULL, "VS", "vs_5_0", flag, 0, NULL, vertexShaderBuffer.Assign(), errorMessage.Assign(), NULL);
-	if (FAILED(result)) {
+	HRESULT hr = D3DX11CompileFromFile(vsFile, NULL, NULL, "VS", "vs_5_0", flag, 0, NULL, vertexShaderBuffer.Assign(), errorMessage.Assign(), NULL);
+	if (FAILED(hr)) {
 		if (errorMessage) {
 			char *pCompileErrors = (char *)(errorMessage->GetBufferPointer());
-			if (pCompileErrors)
-				::MessageBoxA(0, pCompileErrors, 0, 0);
+			if (pCompileErrors) {
+				OutputDebugStringA(pCompileErrors);
+				OutputDebugStringA("\n");
+			}
 		}
 
+		assert(false);
 		return false;
 	}
 
-	result = D3DX11CompileFromFile(psFile, NULL, NULL, "PS", "ps_5_0", flag, 0, NULL, pixelShaderBuffer.Assign(), errorMessage.Assign(), NULL);
-	if (FAILED(result)) {
+	hr = D3DX11CompileFromFile(psFile, NULL, NULL, "PS", "ps_5_0", flag, 0, NULL, pixelShaderBuffer.Assign(), errorMessage.Assign(), NULL);
+	if (FAILED(hr)) {
 		if (errorMessage) {
 			char *pCompileErrors = (char *)(errorMessage->GetBufferPointer());
-			if (pCompileErrors)
-				::MessageBoxA(0, pCompileErrors, 0, 0);
+			if (pCompileErrors) {
+				OutputDebugStringA(pCompileErrors);
+				OutputDebugStringA("\n");
+			}
 		}
 
+		assert(false);
 		return false;
 	}
 
-	result = pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, m_pVertexShader.Assign());
-	if (FAILED(result)) {
+	hr = pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, m_pVertexShader.Assign());
+	if (FAILED(hr)) {
+		assert(false);
 		return false;
 	}
 
-	result = pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, m_pPixelShader.Assign());
-	if (FAILED(result)) {
+	hr = pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, m_pPixelShader.Assign());
+	if (FAILED(hr)) {
+		assert(false);
 		return false;
 	}
 
@@ -52,8 +61,9 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 	inputLayoutDesc[1].AlignedByteOffset = 16;
 
 	unsigned int numElements = sizeof(inputLayoutDesc) / sizeof(inputLayoutDesc[0]);
-	result = pDevice->CreateInputLayout(inputLayoutDesc, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), m_pInputLayout.Assign());
-	if (FAILED(result)) {
+	hr = pDevice->CreateInputLayout(inputLayoutDesc, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), m_pInputLayout.Assign());
+	if (FAILED(hr)) {
+		assert(false);
 		return false;
 	}
 
@@ -61,8 +71,9 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = vertexSize;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	result = pDevice->CreateBuffer(&vertexBufferDesc, NULL, m_pVertexBuffer.Assign());
-	if (FAILED(result)) {
+	hr = pDevice->CreateBuffer(&vertexBufferDesc, NULL, m_pVertexBuffer.Assign());
+	if (FAILED(hr)) {
+		assert(false);
 		return false;
 	}
 
@@ -71,8 +82,9 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 		CBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 		CBufferDesc.ByteWidth = vsBufferSize;
 		CBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		result = pDevice->CreateBuffer(&CBufferDesc, NULL, m_pVSBuffer.Assign());
-		if (FAILED(result)) {
+		hr = pDevice->CreateBuffer(&CBufferDesc, NULL, m_pVSBuffer.Assign());
+		if (FAILED(hr)) {
+			assert(false);
 			return false;
 		}
 	}
@@ -82,8 +94,9 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 		CBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 		CBufferDesc.ByteWidth = psBufferSize;
 		CBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		result = pDevice->CreateBuffer(&CBufferDesc, NULL, m_pPSBuffer.Assign());
-		if (FAILED(result)) {
+		hr = pDevice->CreateBuffer(&CBufferDesc, NULL, m_pPSBuffer.Assign());
+		if (FAILED(hr)) {
+			assert(false);
 			return false;
 		}
 	}
@@ -97,8 +110,9 @@ bool tShader::InitShader(ComPtr<ID3D11Device> pDevice, WCHAR *vsFile, WCHAR *psF
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	result = pDevice->CreateSamplerState(&samplerDesc, m_pSampleState.Assign());
-	if (FAILED(result)) {
+	hr = pDevice->CreateSamplerState(&samplerDesc, m_pSampleState.Assign());
+	if (FAILED(hr)) {
+		assert(false);
 		return false;
 	}
 

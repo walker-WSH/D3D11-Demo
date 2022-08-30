@@ -4,16 +4,16 @@
 #include "d3dDefine.h"
 
 struct tShader {
-	//vertex shader
+	// vertex shader
 	ComPtr<ID3D11VertexShader> m_pVertexShader;
 	ComPtr<ID3D11Buffer> m_pVSBuffer;
 
-	ComPtr<ID3D11InputLayout> m_pInputLayout;
-	ComPtr<ID3D11Buffer> m_pVertexBuffer;
-
-	//pixel shader
+	// pixel shader
 	ComPtr<ID3D11PixelShader> m_pPixelShader;
 	ComPtr<ID3D11Buffer> m_pPSBuffer;
+
+	ComPtr<ID3D11InputLayout> m_pInputLayout;
+	ComPtr<ID3D11Buffer> m_pVertexBuffer;
 
 	ComPtr<ID3D11SamplerState> m_pSampleState;
 
