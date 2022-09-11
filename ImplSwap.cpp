@@ -53,7 +53,7 @@ bool tWindowSwap::TestResizeSwapChain(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D1
 	m_pSwapBackTexture2D->GetDesc(&desc);
 
 	if (desc.Width == rcClient.Width() && desc.Height == rcClient.Height())
-		return false;
+		return true;
 
 	ID3D11RenderTargetView *renderView = NULL;
 	pDeviceContext->OMSetRenderTargets(1, &renderView, NULL);
@@ -65,6 +65,5 @@ bool tWindowSwap::TestResizeSwapChain(ComPtr<ID3D11Device> pDevice, ComPtr<ID3D1
 	if (FAILED(hr))
 		return false;
 
-	_CreateTargetView(pDevice);
-	return true;
+	return _CreateTargetView(pDevice);
 }
