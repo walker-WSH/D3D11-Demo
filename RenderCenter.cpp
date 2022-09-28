@@ -257,10 +257,7 @@ void CRenderCenter::UpdateMatrix(D3DXMATRIX worldMatrix, int baseWidth, int base
 	worldMatrix.m[2][2] = -worldMatrix.m[2][2];
 	worldMatrix.m[3][2] = -worldMatrix.m[3][2];
 
-	D3DXMATRIX orthoMatrix = _GetOrthoMatrix(baseWidth, baseHeight);
-
-	D3DXMatrixIdentity(&m_wvpMatrix);
-	m_wvpMatrix = worldMatrix * orthoMatrix;
+	m_wvpMatrix = worldMatrix * _GetOrthoMatrix(baseWidth, baseHeight);
 	D3DXMatrixTranspose(&m_wvpMatrix, &m_wvpMatrix);
 
 	m_pDeviceContext->UpdateSubresource(m_pTextureShader->m_pVSBuffer, 0, nullptr, &(m_wvpMatrix.m[0][0]), 0, 0);
